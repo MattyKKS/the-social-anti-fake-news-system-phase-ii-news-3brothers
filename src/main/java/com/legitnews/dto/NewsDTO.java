@@ -13,7 +13,9 @@ public class NewsDTO {
   String reporter;
   LocalDateTime dateTime;
   String imageUrl;
+  String imagePublicUrl;
   NewsStatus status;
   int votesReal;
   int votesFake;
+  long commentCount;
 }
