@@ -16,4 +16,5 @@ public class NewsDTO {
   NewsStatus status;
   int votesReal;
   int votesFake;
+  long commentCount;
 }

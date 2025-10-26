@@ -13,12 +13,11 @@ public class NewsController {
   public NewsController(NewsService service){ this.service = service; }
 
   @GetMapping
-  public Page<NewsDTO> list(
-      @RequestParam(required=false) String q,
-      @RequestParam(required=false) String category,
-      @RequestParam(required=false) NewsStatus status,
-      @RequestParam(defaultValue="0") int page,
-      @RequestParam(defaultValue="10") int size) {
+  public Page<NewsDTO> list(@RequestParam(required=false) String q,
+                            @RequestParam(required=false) String category,
+                            @RequestParam(required=false) NewsStatus status,
+                            @RequestParam(defaultValue="0") int page,
+                            @RequestParam(defaultValue="10") int size) {
     return service.list(q, category, status, page, size);
   }
 

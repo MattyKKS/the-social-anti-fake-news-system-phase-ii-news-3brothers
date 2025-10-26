@@ -15,9 +15,7 @@ public class NewsDaoImpl implements NewsDao {
     Pageable pageable = PageRequest.of(Math.max(0,page), Math.min(100,size), Sort.by("dateTime").descending());
     return repo.search(emptyToNull(q), emptyToNull(category), status, pageable);
   }
-
   @Override
   public News getNews(Long id) { return repo.findById(id).orElse(null); }
-
   private String emptyToNull(String s){ return (s==null || s.isBlank()) ? null : s; }
 }
