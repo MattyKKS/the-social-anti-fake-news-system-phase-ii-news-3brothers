@@ -9,6 +9,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -18,6 +19,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 @Configuration
+@ConditionalOnProperty(name = "app.import.enabled", havingValue = "true", matchIfMissing = false)
 public class JsonImportConfig {
 
   @Value("${app.import.force:false}")
