@@ -32,4 +32,8 @@ public class News {
 
   @OneToMany(mappedBy="news", cascade=CascadeType.ALL, orphanRemoval=true)
   private List<Comment> comments = new ArrayList<>();
+
+  @ManyToOne(optional = true)                 
+  @JoinColumn(name = "created_by_id")
+  private User createdBy;
 }

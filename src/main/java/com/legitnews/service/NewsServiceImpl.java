@@ -1,10 +1,12 @@
 package com.legitnews.service;
 
 import com.legitnews.dao.NewsDao;
+import com.legitnews.dto.CreateNewsRequest;
 import com.legitnews.dto.NewsDTO;
 import com.legitnews.entity.News;
 import com.legitnews.entity.NewsStatus;
 import com.legitnews.repository.NewsRepository;
+import com.legitnews.repository.UserRepository;
 import com.legitnews.util.Mappers;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -18,13 +20,15 @@ import java.util.stream.Collectors;
 public class NewsServiceImpl implements NewsService {
   private final NewsDao dao;
   private final Mappers mappers;
-  private final NewsRepository newsRepo; // <-- add this line
+  private final NewsRepository newsRepo;
+  private final UserRepository userRepo;
 
   // ✅ Updated constructor: include NewsRepository
-  public NewsServiceImpl(NewsDao dao, Mappers mappers, NewsRepository newsRepo) {
+  public NewsServiceImpl(NewsDao dao, Mappers mappers, NewsRepository newsRepo, UserRepository userRepo) {
     this.dao = dao;
     this.mappers = mappers;
     this.newsRepo = newsRepo;
+    this.userRepo = userRepo;
   }
 
   @Override
@@ -53,5 +57,28 @@ public class NewsServiceImpl implements NewsService {
     else throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "value must be real|fake");
 
     newsRepo.save(n);
+  }
+
+  @Override
+  public NewsDTO create(CreateNewsRequest req) {
+    var n = new News();
+    n.setCategory(req.getCategory());
+    n.setHeadline(req.getHeadline());
+    n.setDetails(req.getDetails());
+    n.setReporter(req.getReporter());
+    n.setImageUrl(req.getImageUrl());
+    n.setDateTime(java.time.OffsetDateTime.parse(req.getDateTime()).toLocalDateTime());
+
+    if (req.getCreatedBy() != null) {
+      var u = userRepo.findById(req.getCreatedBy())
+          .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+      n.setCreatedBy(u);
+    }
+    n.setStatus(com.legitnews.entity.NewsStatus.UNKNOWN);
+    n.setVotesReal(0);
+    n.setVotesFake(0);
+
+    n = newsRepo.save(n);
+    return mappers.toDTO(n);
   }
 }
