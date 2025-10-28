@@ -23,4 +23,9 @@ public class NewsController {
 
   @GetMapping("/{id}")
   public NewsDTO get(@PathVariable Long id){ return service.get(id); }
+
+  @PostMapping("/{id}/vote")
+  public void vote(@PathVariable Long id, @RequestParam String value) {
+    service.vote(id, value); // updates DB; no response body needed
+  }
 }

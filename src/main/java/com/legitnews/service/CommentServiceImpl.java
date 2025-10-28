@@ -46,7 +46,7 @@ public class CommentServiceImpl implements CommentService {
   }
 
   @Override
-  public CommentDTO add(Long newsId, Long userId, String content) {
+  public CommentDTO add(Long newsId, Long userId, String content, String imageUrl, boolean anonymous) {
     News n = newsRepo.findById(newsId)
         .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "News not found"));
     User u = userRepo.findById(userId)
@@ -56,6 +56,8 @@ public class CommentServiceImpl implements CommentService {
         .news(n)
         .user(u)
         .content(content)
+        .imageUrl(imageUrl)
+        .anonymous(anonymous)
         .createdAt(LocalDateTime.now())
         .build();
 

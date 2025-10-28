@@ -39,12 +39,14 @@ public class Mappers {
 
   public CommentDTO toDTO(Comment c) {
     if (c == null) return null;
+    String display = c.isAnonymous() ? "Anonymous" : c.getUser().getName();
     return CommentDTO.builder()
         .id(c.getId())
         .newsId(c.getNews().getId())
         .userId(c.getUser().getId())
         .userName(c.getUser().getName())
         .content(c.getContent())
+        .imageUrl(c.getImageUrl())
         .createdAt(c.getCreatedAt())
         .build();
   }
