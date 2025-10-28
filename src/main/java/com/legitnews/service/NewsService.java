@@ -7,4 +7,5 @@ import org.springframework.data.domain.Page;
 public interface NewsService {
   Page<NewsDTO> list(String q, String category, NewsStatus status, int page, int size);
   NewsDTO get(Long id);
+  void vote(Long id, String value);
 }

@@ -22,7 +22,9 @@ public class CommentController {
   @PostMapping
   public CommentDTO add(@PathVariable Long newsId,
                         @RequestParam Long userId,
-                        @RequestParam String content) {
-    return service.add(newsId, userId, content);
+                        @RequestParam String content,
+                        @RequestParam(required = false) String imageUrl,
+                        @RequestParam(defaultValue = "false") boolean anonymous) {
+    return service.add(newsId, userId, content, imageUrl, anonymous);
   }
 }

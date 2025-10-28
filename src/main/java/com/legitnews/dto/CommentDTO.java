@@ -10,5 +10,6 @@ public class CommentDTO {
   Long userId;
   String userName;
   String content;
+  String imageUrl;
   LocalDateTime createdAt;
 }
