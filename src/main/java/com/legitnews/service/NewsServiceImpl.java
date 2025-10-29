@@ -18,6 +18,7 @@ import org.springframework.web.server.ResponseStatusException;
 import java.time.LocalDateTime;                  // ✅ add this
 import java.time.OffsetDateTime;                // ✅ add this (for robust parse)
 import java.util.stream.Collectors;
+import jakarta.transaction.Transactional;
 
 @Service
 public class NewsServiceImpl implements NewsService {
@@ -48,15 +49,46 @@ public class NewsServiceImpl implements NewsService {
   }
 
   @Override
-  public void vote(Long id, String value) {
-    var n = newsRepo.findById(id)
+  @Transactional
+  public void vote(Long newsId, String value, Long userId) {
+    if (userId == null) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "userId is required");
+    }
+
+    var n = newsRepo.findById(newsId)
         .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "News not found"));
-    String v = value == null ? "" : value.trim().toLowerCase();
-    if ("real".equals(v)) n.setVotesReal(n.getVotesReal() + 1);
-    else if ("fake".equals(v)) n.setVotesFake(n.getVotesFake() + 1);
-    else throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "value must be real|fake");
+
+    final String v = value == null ? "" : value.trim().toLowerCase();
+    final boolean toReal = switch (v) {
+      case "real" -> true;
+      case "fake" -> false;
+      default -> throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "value must be real|fake");
+    };
+
+    // already voted this way? no-op
+    if (toReal && n.getRealVoterIds().contains(userId)) return;
+    if (!toReal && n.getFakeVoterIds().contains(userId)) return;
+
+    // if switching sides, remove from the other bucket and decrement
+    if (n.getRealVoterIds().remove(userId)) {
+      n.setVotesReal(Math.max(0, n.getVotesReal() - 1));
+    }
+    if (n.getFakeVoterIds().remove(userId)) {
+      n.setVotesFake(Math.max(0, n.getVotesFake() - 1));
+    }
+
+    // add to target and increment
+    if (toReal) {
+      n.getRealVoterIds().add(userId);
+      n.setVotesReal(n.getVotesReal() + 1);
+    } else {
+      n.getFakeVoterIds().add(userId);
+      n.setVotesFake(n.getVotesFake() + 1);
+    }
+
     newsRepo.save(n);
   }
+
 
   @Override
   public NewsDTO create(CreateNewsRequest req) {

@@ -63,4 +63,38 @@ public class CommentServiceImpl implements CommentService {
 
     return mappers.toDTO(commentRepo.save(c)); // <-- use injected mapper
   }
+
+  @Override
+  public CommentDTO edit(Long newsId, Long commentId, Long userId, String content, String imageUrl, boolean anonymous) {
+    var c = commentRepo.findById(commentId)
+        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Comment not found"));
+
+    if (!c.getNews().getId().equals(newsId)) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Comment/news mismatch");
+    }
+    if (!c.getUser().getId().equals(userId)) {
+      throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You can edit only your comment");
+    }
+
+    c.setContent(content);
+    c.setImageUrl(imageUrl);
+    c.setAnonymous(anonymous);
+    var saved = commentRepo.save(c);
+    return mappers.toDTO(saved);
+  }
+
+  @Override
+  public void delete(Long newsId, Long commentId, Long userId) {
+    var c = commentRepo.findById(commentId)
+        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Comment not found"));
+
+    if (!c.getNews().getId().equals(newsId)) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Comment/news mismatch");
+    }
+    if (!c.getUser().getId().equals(userId)) {
+      throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You can delete only your comment");
+    }
+
+    commentRepo.delete(c);
+  }
 }
