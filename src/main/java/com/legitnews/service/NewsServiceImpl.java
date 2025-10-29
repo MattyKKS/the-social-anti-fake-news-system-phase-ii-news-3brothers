@@ -5,6 +5,7 @@ import com.legitnews.dto.CreateNewsRequest;
 import com.legitnews.dto.NewsDTO;
 import com.legitnews.entity.News;
 import com.legitnews.entity.NewsStatus;
+import com.legitnews.entity.User;                 // ✅ add this
 import com.legitnews.repository.NewsRepository;
 import com.legitnews.repository.UserRepository;
 import com.legitnews.util.Mappers;
@@ -14,6 +15,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.time.LocalDateTime;                  // ✅ add this
+import java.time.OffsetDateTime;                // ✅ add this (for robust parse)
 import java.util.stream.Collectors;
 
 @Service
@@ -23,7 +26,6 @@ public class NewsServiceImpl implements NewsService {
   private final NewsRepository newsRepo;
   private final UserRepository userRepo;
 
-  // ✅ Updated constructor: include NewsRepository
   public NewsServiceImpl(NewsDao dao, Mappers mappers, NewsRepository newsRepo, UserRepository userRepo) {
     this.dao = dao;
     this.mappers = mappers;
@@ -49,34 +51,46 @@ public class NewsServiceImpl implements NewsService {
   public void vote(Long id, String value) {
     var n = newsRepo.findById(id)
         .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "News not found"));
-
-    String v = (value == null) ? "" : value.trim().toLowerCase();
-
+    String v = value == null ? "" : value.trim().toLowerCase();
     if ("real".equals(v)) n.setVotesReal(n.getVotesReal() + 1);
     else if ("fake".equals(v)) n.setVotesFake(n.getVotesFake() + 1);
     else throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "value must be real|fake");
-
     newsRepo.save(n);
   }
 
   @Override
   public NewsDTO create(CreateNewsRequest req) {
-    var n = new News();
-    n.setCategory(req.getCategory());
-    n.setHeadline(req.getHeadline());
-    n.setDetails(req.getDetails());
-    n.setReporter(req.getReporter());
-    n.setImageUrl(req.getImageUrl());
-    n.setDateTime(java.time.OffsetDateTime.parse(req.getDateTime()).toLocalDateTime());
-
-    if (req.getCreatedBy() != null) {
-      var u = userRepo.findById(req.getCreatedBy())
-          .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
-      n.setCreatedBy(u);
+    // ✅ resolve creator (nullable)
+    User creator = null;
+    if (req.getCreatedById() != null) {
+      creator = userRepo.findById(req.getCreatedById()).orElse(null);
     }
-    n.setStatus(com.legitnews.entity.NewsStatus.UNKNOWN);
-    n.setVotesReal(0);
-    n.setVotesFake(0);
+
+    // ✅ parse date string -> LocalDateTime (robust to ISO or ISO-Offset)
+    LocalDateTime dt = LocalDateTime.now();
+    if (req.getDateTime() != null && !req.getDateTime().isBlank()) {
+      try {
+        dt = LocalDateTime.parse(req.getDateTime());
+      } catch (Exception e1) {
+        try {
+          dt = OffsetDateTime.parse(req.getDateTime()).toLocalDateTime();
+        } catch (Exception e2) {
+          // fallback to now; or throw if you prefer strict
+          dt = LocalDateTime.now();
+        }
+      }
+    }
+
+    News n = News.builder()
+        .category(req.getCategory())
+        .headline(req.getHeadline())
+        .details(req.getDetails())
+        .reporter(req.getReporter())
+        .dateTime(dt)                         // ✅ pass LocalDateTime
+        .imageUrl(req.getImageUrl())
+        .status(NewsStatus.UNKNOWN)           // default
+        .createdBy(creator)                   // ✅ store creator
+        .build();
 
     n = newsRepo.save(n);
     return mappers.toDTO(n);

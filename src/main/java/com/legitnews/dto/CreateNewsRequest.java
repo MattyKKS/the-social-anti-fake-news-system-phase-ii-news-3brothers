@@ -11,5 +11,5 @@ public class CreateNewsRequest {
   private String reporter;     // free text / media name
   private String imageUrl;     // store RELATIVE path: /images/<Category>/<file>
   private String dateTime;     
-  private Long createdBy;      
+  private Long createdById;      
 }
