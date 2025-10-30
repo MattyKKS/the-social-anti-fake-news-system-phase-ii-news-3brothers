@@ -13,6 +13,7 @@ public class User {
   private Long id;
 
   @NotBlank private String name;
+  private String surname;
 
   @Email @NotBlank
   private String email;
@@ -26,4 +27,6 @@ public class User {
   private boolean membershipRequested = false;
 
   private LocalDateTime createdAt;
+
+  private String photoUrl;
 }

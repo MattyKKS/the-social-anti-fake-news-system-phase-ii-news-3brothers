@@ -37,6 +37,7 @@ public class AuthServiceImpl implements AuthService {
         .name(req.getName()==null? "Anonymous" : req.getName().trim())
         .email(req.getEmail().trim().toLowerCase())
         .passwordHash(PasswordUtil.hash(req.getPassword()))
+        .photoUrl(req.getPhotoUrl())
         .role(Role.READER) // default on register
         .createdAt(LocalDateTime.now())
         .build();

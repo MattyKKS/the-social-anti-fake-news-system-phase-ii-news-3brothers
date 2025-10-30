@@ -9,6 +9,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/admin")
@@ -45,5 +46,12 @@ public class AdminUserController {
     var u = userRepo.findById(userId).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
     u.setMembershipRequested(false);
     userRepo.save(u);
+  }
+
+  @GetMapping
+  public List<UserDTO> getAllUsers() {
+    return userRepo.findAll().stream()
+        .map(mappers::toDTO)
+        .collect(Collectors.toList());
   }
 }

@@ -8,6 +8,7 @@ import org.springframework.data.repository.query.Param;
 
 import java.time.LocalDateTime;
 import java.util.Optional;
+import java.util.List;
 
 public interface NewsRepository extends JpaRepository<News,Long> {
 
@@ -28,4 +29,6 @@ public interface NewsRepository extends JpaRepository<News,Long> {
   Optional<News> findByHeadlineAndDateTime(String headline, LocalDateTime dateTime);
 
   Page<News> findByHidden(boolean hidden, Pageable pageable);
+
+  List<News> findByCreatedById(Long userId);
 }

@@ -14,5 +14,6 @@ public class UserDTO {
   boolean membershipRequested;
   String joinDate;            // optional
   Integer newsSubmitted;      // optional
-  Integer comments;  
+  Integer comments;
+  String photoUrl;
 }

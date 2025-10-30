@@ -58,6 +58,7 @@ public class Mappers {
         .name(u.getName())
         .email(u.getEmail())
         .role(u.getRole())
+        .photoUrl(imageUrlResolver.toFirebaseUrl(u.getPhotoUrl()))
         .createdAt(u.getCreatedAt())
         .membershipRequested(u.isMembershipRequested())
         .build();
