@@ -45,4 +45,12 @@ public class CommentController {
                      @RequestParam Long userId) {
     service.delete(newsId, commentId, userId);
   }
+
+@PostMapping("/{commentId}/report")
+public void report(@PathVariable Long newsId,
+                   @PathVariable Long commentId,
+                   @RequestParam(required=false) Long reporterId,
+                   @RequestParam(required=false, defaultValue = "") String reason) {
+  service.reportComment(newsId, commentId, reporterId, reason);
+}
 }
