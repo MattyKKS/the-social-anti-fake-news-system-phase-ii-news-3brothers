@@ -21,6 +21,7 @@ import org.springframework.web.server.ResponseStatusException;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import org.springframework.util.StringUtils;
 
 @Service
 public class CommentServiceImpl implements CommentService {
@@ -63,6 +64,16 @@ public class CommentServiceImpl implements CommentService {
     User u = userRepo.findById(userId)
         .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
 
+    boolean hasImage = StringUtils.hasText(imageUrl);
+    boolean hasText  = StringUtils.hasText(content);
+
+    if (!hasText && !hasImage) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Content or image is required");
+    }
+    if (!hasText && hasImage) {
+      content = "(image)"; // satisfy @NotBlank
+    }        
+
     Comment c = Comment.builder()
         .news(n)
         .user(u)
@@ -85,6 +96,16 @@ public class CommentServiceImpl implements CommentService {
     }
     if (!c.getUser().getId().equals(userId)) {
       throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You can edit only your comment");
+    }
+
+    boolean hasImage = StringUtils.hasText(imageUrl);
+    boolean hasText  = StringUtils.hasText(content);
+
+    if (!hasText && !hasImage) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Content or image is required");
+    }
+    if (!hasText && hasImage) {
+      content = "(image)";
     }
 
     c.setContent(content);

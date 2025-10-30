@@ -46,7 +46,7 @@ public class Mappers {
         .userId(c.getUser().getId())
         .userName(c.getUser().getName())
         .content(c.getContent())
-        .imageUrl(c.getImageUrl())
+        .imageUrl(imageUrlResolver.toFirebaseUrl(c.getImageUrl()))
         .createdAt(c.getCreatedAt())
         .build();
   }
