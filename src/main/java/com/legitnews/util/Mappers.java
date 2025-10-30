@@ -59,6 +59,7 @@ public class Mappers {
         .email(u.getEmail())
         .role(u.getRole())
         .createdAt(u.getCreatedAt())
+        .membershipRequested(u.isMembershipRequested())
         .build();
   }
 }

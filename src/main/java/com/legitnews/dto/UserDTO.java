@@ -11,4 +11,8 @@ public class UserDTO {
   String email;
   Role role;
   LocalDateTime createdAt;
+  boolean membershipRequested;
+  String joinDate;            // optional
+  Integer newsSubmitted;      // optional
+  Integer comments;  
 }

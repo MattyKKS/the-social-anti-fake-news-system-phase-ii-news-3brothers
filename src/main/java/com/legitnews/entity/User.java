@@ -23,5 +23,7 @@ public class User {
   @Enumerated(EnumType.STRING)
   private Role role;
 
+  private boolean membershipRequested = false;
+
   private LocalDateTime createdAt;
 }
