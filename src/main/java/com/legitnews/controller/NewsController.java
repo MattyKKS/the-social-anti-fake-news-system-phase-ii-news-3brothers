@@ -17,7 +17,8 @@ public class NewsController {
                             @RequestParam(required=false) String category,
                             @RequestParam(required=false) NewsStatus status,
                             @RequestParam(defaultValue="0") int page,
-                            @RequestParam(defaultValue="10") int size) {
+                            @RequestParam(defaultValue="10") int size,
+                            @RequestParam(defaultValue="false") boolean includeHidden) {
     return service.list(q, category, status, page, size);
   }
 

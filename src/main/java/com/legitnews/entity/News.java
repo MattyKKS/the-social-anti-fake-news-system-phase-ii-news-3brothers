@@ -46,4 +46,7 @@ public class News {
   @ManyToOne(optional = true)                 
   @JoinColumn(name = "created_by_id")
   private User createdBy;
+
+  @Column(nullable = false)
+private boolean hidden = false;
 }
