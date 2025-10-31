@@ -46,7 +46,7 @@ public class Mappers {
         .userId(c.getUser().getId())
         .userName(c.getUser().getName())
         .content(c.getContent())
-        .imageUrl(c.getImageUrl())
+        .imageUrl(imageUrlResolver.toFirebaseUrl(c.getImageUrl()))
         .createdAt(c.getCreatedAt())
         .build();
   }
@@ -58,7 +58,9 @@ public class Mappers {
         .name(u.getName())
         .email(u.getEmail())
         .role(u.getRole())
+        .photoUrl(imageUrlResolver.toFirebaseUrl(u.getPhotoUrl()))
         .createdAt(u.getCreatedAt())
+        .membershipRequested(u.isMembershipRequested())
         .build();
   }
 }

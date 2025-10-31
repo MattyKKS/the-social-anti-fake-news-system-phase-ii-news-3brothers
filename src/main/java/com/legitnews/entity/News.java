@@ -30,6 +30,23 @@ public class News {
   private int votesReal;
   private int votesFake;
 
+  @ElementCollection
+  @CollectionTable(name = "news_real_voters", joinColumns = @JoinColumn(name = "news_id"))
+  @Column(name = "user_id")
+  private java.util.Set<Long> realVoterIds = new java.util.HashSet<>();
+
+  @ElementCollection
+  @CollectionTable(name = "news_fake_voters", joinColumns = @JoinColumn(name = "news_id"))
+  @Column(name = "user_id")
+  private java.util.Set<Long> fakeVoterIds = new java.util.HashSet<>();
+
   @OneToMany(mappedBy="news", cascade=CascadeType.ALL, orphanRemoval=true)
   private List<Comment> comments = new ArrayList<>();
+
+  @ManyToOne(optional = true)                 
+  @JoinColumn(name = "created_by_id")
+  private User createdBy;
+
+  @Column(nullable = false)
+private boolean hidden = false;
 }

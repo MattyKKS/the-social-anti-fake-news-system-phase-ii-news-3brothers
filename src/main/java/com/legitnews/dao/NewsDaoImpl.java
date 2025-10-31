@@ -16,6 +16,6 @@ public class NewsDaoImpl implements NewsDao {
     return repo.search(emptyToNull(q), emptyToNull(category), status, pageable);
   }
   @Override
-  public News getNews(Long id) { return repo.findById(id).orElse(null); }
+  public News getNews(Long id) { return repo.findById(id).filter(n -> !n.isHidden()).orElse(null); }
   private String emptyToNull(String s){ return (s==null || s.isBlank()) ? null : s; }
 }

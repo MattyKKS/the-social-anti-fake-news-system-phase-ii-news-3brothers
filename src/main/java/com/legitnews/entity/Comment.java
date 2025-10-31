@@ -23,7 +23,7 @@ public class Comment {
   @NotBlank @Column(length=1000)
   private String content;
 
-  @Column(length=500)
+  @Column(length=2000)
   private String imageUrl;
 
   @Column(nullable=false)

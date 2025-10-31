@@ -8,6 +8,7 @@ import org.springframework.data.repository.query.Param;
 
 import java.time.LocalDateTime;
 import java.util.Optional;
+import java.util.List;
 
 public interface NewsRepository extends JpaRepository<News,Long> {
 
@@ -18,6 +19,7 @@ public interface NewsRepository extends JpaRepository<News,Long> {
            OR LOWER(n.reporter) LIKE LOWER(CONCAT('%',:q,'%')))
       AND (:cat IS NULL OR n.category = :cat)
       AND (:st IS NULL OR n.status = :st)
+      AND n.hidden = false
   """)
   Page<News> search(@Param("q") String q,
                     @Param("cat") String category,
@@ -25,4 +27,8 @@ public interface NewsRepository extends JpaRepository<News,Long> {
                     Pageable pageable);
 
   Optional<News> findByHeadlineAndDateTime(String headline, LocalDateTime dateTime);
+
+  Page<News> findByHidden(boolean hidden, Pageable pageable);
+
+  List<News> findByCreatedById(Long userId);
 }

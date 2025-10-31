@@ -18,4 +18,5 @@ public class NewsDTO {
   int votesReal;
   int votesFake;
   long commentCount;
+  private boolean hidden;
 }

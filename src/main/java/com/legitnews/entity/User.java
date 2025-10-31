@@ -13,6 +13,7 @@ public class User {
   private Long id;
 
   @NotBlank private String name;
+  private String surname;
 
   @Email @NotBlank
   private String email;
@@ -23,5 +24,9 @@ public class User {
   @Enumerated(EnumType.STRING)
   private Role role;
 
+  private boolean membershipRequested = false;
+
   private LocalDateTime createdAt;
+
+  private String photoUrl;
 }

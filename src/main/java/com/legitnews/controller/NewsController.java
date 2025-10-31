@@ -17,7 +17,8 @@ public class NewsController {
                             @RequestParam(required=false) String category,
                             @RequestParam(required=false) NewsStatus status,
                             @RequestParam(defaultValue="0") int page,
-                            @RequestParam(defaultValue="10") int size) {
+                            @RequestParam(defaultValue="10") int size,
+                            @RequestParam(defaultValue="false") boolean includeHidden) {
     return service.list(q, category, status, page, size);
   }
 
@@ -25,7 +26,7 @@ public class NewsController {
   public NewsDTO get(@PathVariable Long id){ return service.get(id); }
 
   @PostMapping("/{id}/vote")
-  public void vote(@PathVariable Long id, @RequestParam String value) {
-    service.vote(id, value); // updates DB; no response body needed
+  public void vote(@PathVariable Long id, @RequestParam String value, @RequestParam Long userId) {
+    service.vote(id, value, userId); // updates DB; no response body needed
   }
 }
