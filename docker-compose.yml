@@ -1,0 +1,27 @@
+version: "3.9"
+services:
+  db:
+    image: mysql:8.4
+    container_name: legitnews-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: legitnews
+      MYSQL_USER: legit
+      MYSQL_PASSWORD: legit
+    ports: ["3306:3306"]
+    volumes: ["db_data:/var/lib/mysql"]
+
+  phpmyadmin:
+    image: phpmyadmin:5
+    container_name: legitnews-phpmyadmin
+    restart: unless-stopped
+    environment:
+      PMA_HOST: db
+      PMA_USER: root
+      PMA_PASSWORD: root
+    ports: ["8081:80"]
+    depends_on: [db]
+
+volumes:
+  db_data:

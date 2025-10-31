@@ -1,0 +1,110 @@
+Great question. Here’s how your layers differ and where each soft-delete change lives in your current design.
+
+# Who does what?
+
+* **Controller (`NewsController`, `AdminNewsController`)**
+
+  * HTTP in/out only.
+  * Calls the **Service** layer (public API) or, for admin, you currently call the **Repository** directly (that’s okay/minimal).
+
+* **Service interface (`NewsService`)**
+
+  * A contract: what the app can do with “news”.
+  * No code here—just method signatures: `list`, `get`, `vote`, `create`.
+
+* **Service implementation (`NewsServiceImpl`)**
+
+  * Business logic orchestration.
+  * Uses **DAO** to fetch entities, uses **Mappers** to convert to DTOs, enforces rules (e.g., vote switching).
+  * Returns **DTOs** to controllers.
+
+* **DAO interface/impl (`NewsDao`, `NewsDaoImpl`)**
+
+  * Data access abstraction dedicated to **reads** (your code uses it that way).
+  * Wraps the **Repository** queries and pagination. Keeps JPA/JPQL details out of the Service.
+  * Returns **entities** to the Service (which then maps to DTOs).
+
+* **Repository (`NewsRepository`)**
+
+  * Spring Data JPA. Lowest level.
+  * JPQL/native queries that hit the DB.
+
+# Why both DAO and Service?
+
+* **Service** speaks in use-case/business terms and DTOs, and can combine multiple DAOs/repos, enforce rules, etc.
+* **DAO** focuses on *how* to read from persistence (JPQL, paging, filters).
+* **Repository** is the raw persistence API; the DAO shields the service from query details.
+
+# Where the soft-delete (hidden) rules live
+
+We keep the changes **where data is fetched** so all public reads automatically respect hidden:
+
+1. **Repository** (query level)
+
+```java
+// NewsRepository
+@Query("""
+  SELECT n FROM News n
+  WHERE (:q IS NULL OR LOWER(n.headline) LIKE LOWER(CONCAT('%',:q,'%'))
+         OR LOWER(n.details)  LIKE LOWER(CONCAT('%',:q,'%'))
+         OR LOWER(n.reporter) LIKE LOWER(CONCAT('%',:q,'%')))
+    AND (:cat IS NULL OR n.category = :cat)
+    AND (:st IS NULL OR n.status = :st)
+    AND n.hidden = false           // <— added: public lists exclude hidden
+""")
+Page<News> search(...);
+```
+
+2. **DAO** (single-item read)
+
+```java
+// NewsDaoImpl
+@Override
+public News getNews(Long id) {
+  return repo.findById(id)
+             .filter(n -> !n.isHidden())   // <— added: public detail excludes hidden
+             .orElse(null);
+}
+```
+
+3. **Service/Impl**
+
+* **No signature changes needed.**
+* `NewsServiceImpl.list()` still calls `dao.getNews(...)` and maps to DTOs.
+* `NewsServiceImpl.get(id)` still calls `dao.getNews(id)` and returns `null` → controller maps to 404/handling as you already do.
+
+# Admin vs Public paths
+
+* **Public**
+
+  * `NewsController.list` → `NewsService.list` → `NewsDao.getNews` → `NewsRepository.search (hidden=false)`
+  * `NewsController.get` → `NewsService.get` → `NewsDao.getNews(id) (filters hidden)`
+
+* **Admin**
+
+  * `AdminNewsController`
+
+    * `GET /api/admin/news?status=active|deleted|all` uses `NewsRepository` directly (fine/minimal).
+    * `PATCH /hide|/restore` toggles `hidden` on the entity.
+
+# TL;DR of “Impl”
+
+* `*Impl` is just the concrete **implementation** of an interface.
+
+  * `NewsService` (interface) ←→ `NewsServiceImpl` (class).
+  * `NewsDao` (interface) ←→ `NewsDaoImpl` (class).
+
+# What changed vs what stayed the same
+
+* **Changed**
+
+  * `NewsRepository.search`: added `AND n.hidden = false`.
+  * `NewsDaoImpl.getNews(Long)`: added `.filter(n -> !n.isHidden())`.
+
+* **Unchanged**
+
+  * `NewsService` interface and `NewsServiceImpl` signatures.
+  * `Mappers`, DTOs, vote logic, create logic.
+  * `AdminNewsController` endpoints and your Pinia `fetchAdminNews`, `adminHideNews`, `adminRestoreNews` functions.
+
+This keeps your existing structure intact, hides soft-deleted news from all public endpoints (Home, detail, search), and lets Admin see/manage both active and deleted via the admin API.
